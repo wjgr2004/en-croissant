@@ -416,16 +416,18 @@ function BoardGame() {
         equal(payload.moves, moves) &&
         !pos?.isEnd()
       ) {
-        appendMove({
-          payload: parseUci(ev[0].uciMoves[0])!,
-          clock: (pos.turn === "white" ? whiteTime : blackTime) ?? undefined,
-        });
+        if (gameState === "playing") {
+          appendMove({
+            payload: parseUci(ev[0].uciMoves[0])!,
+            clock: (pos.turn === "white" ? whiteTime : blackTime) ?? undefined,
+          });
+        }
       }
     });
     return () => {
       unlisten.then((f) => f());
     };
-  }, [activeTab, appendMove, pos, root.fen, moves, whiteTime, blackTime]);
+  }, [activeTab, appendMove, pos, root.fen, moves, whiteTime, blackTime, gameState]);
 
   const movable = useMemo(() => {
     if (players.white.type === "human" && players.black.type === "human") {
