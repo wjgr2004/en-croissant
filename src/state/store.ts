@@ -107,7 +107,7 @@ export const createTreeStore = (id?: string, initialTree?: TreeState) => {
     currentNode: () => getNodeAtPath(get().root, get().position),
 
     previousClock: () => {
-      const node = getNodeAtPath(get().root, get().position.slice(0, -2));
+      const node = getNodeAtPath(get().root, get().position.slice(0, -1));
       return node?.clock;
     },
 

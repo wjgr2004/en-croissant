@@ -389,14 +389,14 @@ function Board({
               onClick={() => {
                 deleteMove();
                 setFirstMove?.(true);
-                if (turn === "black" && whiteTime) {
+                if (turn === "white") {
                   if (previousClock !== undefined) {
                     setWhiteTime?.(previousClock * 1000);
                   } else if (whiteInitialTime !== undefined) {
                     setWhiteTime?.(whiteInitialTime);
                   }
                 }
-                if (turn === "white" && blackTime) {
+                if (turn === "black") {
                   if (previousClock !== undefined) {
                     setBlackTime?.(previousClock * 1000);
                   } else if (blackInitialTime !== undefined) {
