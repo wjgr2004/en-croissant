@@ -403,6 +403,8 @@ function BoardGame() {
   const [whiteTime, setWhiteTime] = useState<number | null>(null);
   const [blackTime, setBlackTime] = useState<number | null>(null);
 
+  const [firstMove, setFirstMove] = useState<boolean>(true)
+
   useEffect(() => {
     const unlisten = events.bestMovesPayload.listen(({ payload }) => {
       const ev = payload.bestLines;
@@ -486,6 +488,8 @@ function BoardGame() {
 
   function startGame() {
     setGameState("playing");
+
+    setFirstMove(true);
 
     const players = getPlayers();
 
@@ -572,21 +576,21 @@ function BoardGame() {
       const intervalId = setInterval(decrementTime, 100);
       if (pos?.turn === "black" && whiteTime !== null) {
         setWhiteTime(
-          (prev) => prev! + (players.white.timeControl?.increment ?? 0),
+          (prev) => firstMove
+            ? prev!
+            : prev! + (players.white.timeControl?.increment ?? 0),
         );
       }
       if (pos?.turn === "white" && blackTime !== null) {
-        setBlackTime((prev) => {
-          if (pos?.fullmoves === 1) {
-            return prev!;
-          }
-
-          return prev! + (players.black.timeControl?.increment ?? 0);
-        });
+        setBlackTime((prev) => firstMove
+          ? prev!
+          : prev! + (players.black.timeControl?.increment ?? 0),
+        );
       }
       setIntervalId(intervalId);
+      setFirstMove(false);
     }
-  }, [gameState, intervalId, pos?.turn]);
+  }, [gameState, intervalId, pos?.turn, firstMove, setFirstMove]);
 
   const onePlayerIsEngine =
     (players.white.type === "engine" || players.black.type === "engine") &&
