@@ -401,7 +401,9 @@ function BoardGame() {
   ]);
 
   const [whiteTime, setWhiteTime] = useState<number | null>(null);
+  const [whiteInitialTime, setWhiteInitialTime] = useState<number | null>(null);
   const [blackTime, setBlackTime] = useState<number | null>(null);
+  const [blackInitialTime, setBlackInitialTime] = useState<number | null>(null);
 
   const [firstMove, setFirstMove] = useState<boolean>(true)
 
@@ -497,10 +499,12 @@ function BoardGame() {
 
     if (players.white.timeControl) {
       setWhiteTime(players.white.timeControl.seconds);
+      setWhiteInitialTime(players.white.timeControl.seconds);
     }
 
     if (players.black.timeControl) {
       setBlackTime(players.black.timeControl.seconds);
+      setBlackInitialTime(players.black.timeControl.seconds);
     }
 
     setPlayers(players);
@@ -609,12 +613,21 @@ function BoardGame() {
           disableVariations
           boardRef={boardRef}
           canTakeBack={onePlayerIsEngine}
+          setFirstMove={setFirstMove}
+          setWhiteTime={setWhiteTime}
+          setBlackTime={setBlackTime}
           movable={movable}
           whiteTime={
             gameState === "playing" ? (whiteTime ?? undefined) : undefined
           }
           blackTime={
             gameState === "playing" ? (blackTime ?? undefined) : undefined
+          }
+          whiteInitialTime={
+            gameState === "playing" ? (whiteInitialTime ?? undefined) : undefined
+          }
+          blackInitialTime={
+            gameState === "playing" ? (blackInitialTime ?? undefined) : undefined
           }
         />
       </Portal>

@@ -30,6 +30,8 @@ export interface TreeStoreState {
 
   currentNode: () => TreeNode;
 
+  previousClock: () => number|undefined;
+
   goToNext: () => void;
   goToPrevious: () => void;
   goToStart: () => void;
@@ -62,12 +64,15 @@ export interface TreeStoreState {
     mainline?: boolean;
     changeHeaders?: boolean;
   }) => void;
+
   deleteMove: (path?: number[]) => void;
   promoteVariation: (path: number[]) => void;
   promoteToMainline: (path: number[]) => void;
   copyVariationPgn: (path: number[]) => void;
 
   setStart: (start: number[]) => void;
+
+  setCurrentClock: (payload: number) => void;
 
   setAnnotation: (payload: Annotation) => void;
   setComment: (payload: string) => void;
@@ -100,6 +105,11 @@ export const createTreeStore = (id?: string, initialTree?: TreeState) => {
     ...(initialTree ?? defaultTree()),
 
     currentNode: () => getNodeAtPath(get().root, get().position),
+
+    previousClock: () => {
+      const node = getNodeAtPath(get().root, get().position.slice(0, -2));
+      return node?.clock;
+    },
 
     setState: (state) => {
       set(() => state);
@@ -399,6 +409,14 @@ export const createTreeStore = (id?: string, initialTree?: TreeState) => {
           state.headers.start = start;
         }),
       ),
+      setCurrentClock: (payload: number) =>
+          set(
+              produce((state) => {
+              state.dirty = true;
+              let currentNode = getNodeAtPath(state.root, state.position)
+              currentNode.clock = payload;
+          }),
+              ),
     setAnnotation: (payload) =>
       set(
         produce((state) => {

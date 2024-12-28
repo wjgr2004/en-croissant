@@ -69,7 +69,7 @@ import { chessgroundDests, chessgroundMove } from "chessops/compat";
 import { makeSan } from "chessops/san";
 import domtoimage from "dom-to-image";
 import { useAtom, useAtomValue } from "jotai";
-import { memo, useCallback, useContext, useMemo, useState } from "react";
+import {memo, useCallback, useContext, useEffect, useMemo, useState} from "react";
 import { Helmet } from "react-helmet";
 import { useHotkeys } from "react-hotkeys-hook";
 import { useTranslation } from "react-i18next";
@@ -101,8 +101,13 @@ interface ChessboardProps {
   saveFile?: () => void;
   addGame?: () => void;
   canTakeBack?: boolean;
+  setFirstMove?: (payload: boolean) => void;
   whiteTime?: number;
+  whiteInitialTime?: number;
+  setWhiteTime?: (payload: number) => void;
   blackTime?: number;
+  blackInitialTime?: number;
+  setBlackTime?: (payload: number) => void;
   practicing?: boolean;
 }
 
@@ -117,8 +122,13 @@ function Board({
   saveFile,
   addGame,
   canTakeBack,
+  setFirstMove,
   whiteTime,
+  whiteInitialTime,
+  setWhiteTime,
   blackTime,
+  blackInitialTime,
+  setBlackTime,
   practicing,
 }: ChessboardProps) {
   const { t } = useTranslation();
@@ -134,6 +144,7 @@ function Board({
   const position = useStore(store, (s) => s.position);
   const headers = useStore(store, (s) => s.headers);
   const currentNode = useStore(store, (s) => s.currentNode());
+  const previousClock = useStore(store, (s) => s.previousClock());
 
   const arrows = useAtomValue(
     bestMovesFamily({
@@ -150,6 +161,7 @@ function Board({
   const clearShapes = useStore(store, (s) => s.clearShapes);
   const setShapes = useStore(store, (s) => s.setShapes);
   const setFen = useStore(store, (s) => s.setFen);
+  const setCurrentClock = useStore(store, (s) => s.setCurrentClock);
 
   const [pos, error] = positionFromFen(currentNode.fen);
 
@@ -374,7 +386,25 @@ function Board({
             <ActionIcon
               variant="default"
               size="lg"
-              onClick={() => deleteMove()}
+              onClick={() => {
+                deleteMove();
+                setFirstMove?.(true);
+                if (turn === "black" && whiteTime) {
+                  if (previousClock !== undefined) {
+                    setWhiteTime?.(previousClock * 1000);
+                  } else if (whiteInitialTime !== undefined) {
+                    setWhiteTime?.(whiteInitialTime);
+                  }
+                }
+                if (turn === "white" && blackTime) {
+                  if (previousClock !== undefined) {
+                    setBlackTime?.(previousClock * 1000);
+                  } else if (blackInitialTime !== undefined) {
+                    setBlackTime?.(blackInitialTime);
+                  }
+                }
+              }
+            }
             >
               <IconArrowBack />
             </ActionIcon>
@@ -468,6 +498,7 @@ function Board({
       toggleEditingMode,
       toggleOrientation,
       addGame,
+      setFirstMove,
     ],
   );
   const materialDiff = getMaterialDiff(currentNode.fen);
